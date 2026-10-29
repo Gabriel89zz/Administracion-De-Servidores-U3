@@ -5,8 +5,8 @@
 
 * **Sistema Operativo:** Debian Server 12 (Bookworm) / 64-bit
 * **Entorno de Pruebas:** Máquina Virtual (VirtualBox / VMware)
-* **Estudiante:** [Tu Nombre Completo Aquí]
-* **Matrícula / ID:** [Tu Matrícula Aquí]
+* **Estudiante:** Hector Gabriel Torres Arzola
+* **Matrícula / ID:** I23050363
 * **Docente / Asignatura:** Administración de Servidores
 
 ---
