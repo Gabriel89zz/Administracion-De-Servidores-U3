@@ -53,5 +53,5 @@ Para reproducir las demostraciones y ejecutar los scripts:
 3. Paquetes requeridos instalados:
    ```bash
    sudo apt update
-   sudo apt install -y sudo libpam-modules libpam-faillock passwd acl quota rsync tar mdadm samba cups
+   sudo apt install -y sudo libpam-modules passwd acl quota rsync tar mdadm samba cups cups-client printer-driver-cups-pdf
    ```
