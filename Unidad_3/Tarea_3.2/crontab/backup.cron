@@ -1,0 +1,17 @@
+# /etc/cron.d/backup_scheduler
+# ==============================================================================
+# Programación de Respaldos Automatizados y Auditoría de Cuotas - Unidad 3
+# Sistema: Debian GNU/Linux
+# ==============================================================================
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+# 1. Respaldo COMPLETO (Nivel 0) todos los Domingos a las 02:00 AM
+0 2 * * 0 root /ruta/a/scripts/backup.sh full > /dev/null 2>&1
+
+# 2. Respaldo INCREMENTAL (Nivel 1) de Lunes a Sábado a las 02:00 AM
+0 2 * * 1-6 root /ruta/a/scripts/backup.sh inc > /dev/null 2>&1
+
+# 3. Reporte y verificación de Cuotas de Disco diariamente a las 06:00 AM
+0 6 * * * root /usr/sbin/repquota -as > /var/log/quota_daily.log 2>&1

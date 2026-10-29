@@ -1,0 +1,10 @@
+# ==============================================================================
+# /etc/exports - Configuración de Compartición por Red NFS (Network File System)
+# Unidad 3: Almacenamiento Redundante RAID y Recursos Compartidos
+# ==============================================================================
+
+# Exportar volumen RAID a la red local con permisos de lectura/escritura y sincronización síncrona
+/mnt/almacen_redundante/repositorio_compartido  *(rw,sync,no_subtree_check,no_root_squash)
+
+# Exportar área pública en modo lectura/escritura para clientes UNIX/Linux
+/srv/compartido/publico  *(rw,sync,no_subtree_check,all_squash)

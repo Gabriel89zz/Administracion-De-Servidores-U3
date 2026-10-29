@@ -1,0 +1,8 @@
+# username,nombre,apellido,departamento,grupos_secundarios,fecha_expiracion,password_temporal
+carlos.mendoza,Carlos,Mendoza,sistemas,sudo,2027-12-31,TempPassTI2026!
+sofia.castro,Sofia,Castro,sistemas,,2027-12-31,TempPassTI2026!
+ana.morales,Ana,Morales,finanzas,,2027-06-30,Finanzas2026*
+roberto.vega,Roberto,Vega,finanzas,,2027-06-30,Finanzas2026*
+luis.torres,Luis,Torres,operaciones,,2026-12-31,OpsPass2026#
+mariana.solis,Mariana,Solis,operaciones,,2026-12-31,OpsPass2026#
+elena.ramirez,Elena,Ramirez,direccion,finanzas,2028-12-31,DirGeneral2026!

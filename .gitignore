@@ -1,0 +1,19 @@
+# Entorno y archivos temporales
+*.log
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Backups locales generados por scripts
+backups/
+/var/backups/
+
+# Binarios o paquetes
+*.deb
+*.iso
+
+# IDE y editores
+.vscode/
+.idea/
