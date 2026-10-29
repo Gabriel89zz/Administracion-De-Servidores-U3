@@ -9,7 +9,7 @@
 # Uso: sudo ./provision_users.sh [ruta_archivo_csv]
 # ==============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # Colores para salida enriquecida
 RED='\033[0;31m'
@@ -20,7 +20,17 @@ CYAN='\033[0;36m'
 NC='\033[0m' # Sin color
 
 LOG_FILE="/var/log/user_provisioning.log"
-CSV_FILE="${1:-usuarios.csv}"
+CSV_FILE="${1:-scripts/usuarios.csv}"
+
+# Si no lo encuentra en la ruta directa, buscar relativo al script
+if [[ ! -f "$CSV_FILE" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [[ -f "$SCRIPT_DIR/usuarios.csv" ]]; then
+        CSV_FILE="$SCRIPT_DIR/usuarios.csv"
+    elif [[ -f "$SCRIPT_DIR/../scripts/usuarios.csv" ]]; then
+        CSV_FILE="$SCRIPT_DIR/../scripts/usuarios.csv"
+    fi
+fi
 
 # 1. Comprobación de privilegios de superusuario
 if [[ $EUID -ne 0 ]]; then
@@ -61,19 +71,19 @@ log_msg() {
 }
 
 # 3. Procesar archivo CSV línea por línea
-# Estructura: username,nombre,apellido,departamento,grupos_secundarios,fecha_expiracion,password_temporal
+# Limpiar posibles retornos de carro de Windows (\r) al vuelo con tr -d '\r'
 while IFS=',' read -r USERNAME NOMBRE APELLIDO DEPARTAMENTO GRUPOS_SEC FECHA_EXP PASSWORD_TEMP || [[ -n "$USERNAME" ]]; do
     # Omitir líneas vacías o comentadas (#)
     [[ -z "$USERNAME" || "$USERNAME" =~ ^[[:space:]]*# ]] && continue
 
-    # Limpieza de espacios en blanco
-    USERNAME=$(echo "$USERNAME" | xargs)
-    NOMBRE=$(echo "$NOMBRE" | xargs)
-    APELLIDO=$(echo "$APELLIDO" | xargs)
-    DEPARTAMENTO=$(echo "$DEPARTAMENTO" | xargs)
-    GRUPOS_SEC=$(echo "$GRUPOS_SEC" | xargs)
-    FECHA_EXP=$(echo "$FECHA_EXP" | xargs)
-    PASSWORD_TEMP=$(echo "$PASSWORD_TEMP" | xargs)
+    # Limpieza de espacios en blanco y caracteres de retorno
+    USERNAME=$(echo "$USERNAME" | tr -d '\r' | xargs)
+    NOMBRE=$(echo "$NOMBRE" | tr -d '\r' | xargs)
+    APELLIDO=$(echo "$APELLIDO" | tr -d '\r' | xargs)
+    DEPARTAMENTO=$(echo "$DEPARTAMENTO" | tr -d '\r' | xargs)
+    GRUPOS_SEC=$(echo "$GRUPOS_SEC" | tr -d '\r' | xargs)
+    FECHA_EXP=$(echo "$FECHA_EXP" | tr -d '\r' | xargs)
+    PASSWORD_TEMP=$(echo "$PASSWORD_TEMP" | tr -d '\r' | xargs)
 
     ((TOTAL_PROCESADOS++))
 
