@@ -12,6 +12,9 @@
 
 set -euo pipefail
 
+# Asegurar que las herramientas de /usr/sbin estén en el PATH
+export PATH="/usr/sbin:/sbin:$PATH"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
