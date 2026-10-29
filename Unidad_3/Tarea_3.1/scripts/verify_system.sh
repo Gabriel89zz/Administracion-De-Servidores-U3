@@ -9,7 +9,7 @@
 # Uso: sudo ./verify_system.sh [check | unlock <usuario> | test-login <usuario>]
 # ==============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # Asegurar que las herramientas de /usr/sbin estén en el PATH
 export PATH="/usr/sbin:/sbin:$PATH"
@@ -45,7 +45,7 @@ case "$ACTION" in
         for U in carlos.mendoza ana.morales luis.torres elena.ramirez; do
             if id "$U" >/dev/null 2>&1; then
                 echo -e "${CYAN}Usuario: $U${NC}"
-                chage -l "$U" | grep -E "El último cambio de contraseña|debe cambiarse la contraseña|Caduca la cuenta|Password expires|Account expires|Last password change"
+                chage -l "$U" 2>/dev/null || true
                 echo "-------------------------------------------------------------------"
             fi
         done
