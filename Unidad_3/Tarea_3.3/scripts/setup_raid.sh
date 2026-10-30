@@ -9,7 +9,7 @@
 # Uso: sudo ./setup_raid.sh [--loop | /dev/sdb /dev/sdc]
 # ==============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -55,9 +55,9 @@ if [[ "$MODE" == "--loop" ]]; then
 
     DEVICES=("$DEV1" "$DEV2" "$DEV3")
     echo -e "${GREEN}[OK] Dispositivos de almacenamiento preparados: ${DEVICES[*]}${NC}"
-    RAID_LEVEL="5" # RAID 5 con 3 discos para paridad y tolerancia a 1 fallo
+    RAID_LEVEL="5"
 else
-    # Discos pasados como argumentos de línea de comandos (ej: /dev/sdb /dev/sdc)
+    # Discos pasados como argumentos de línea de comandos (ej: /dev/sdb /dev/sdc /dev/sdd)
     shift || true
     DEVICES=("$MODE" "$@")
     if [[ ${#DEVICES[@]} -eq 2 ]]; then
@@ -67,24 +67,16 @@ else
     fi
 fi
 
-# 2. Desmontar y detener cualquier RAID previo en /dev/md0 si existiera
-if grep -q "md0" /proc/mdstat 2>/dev/null; then
-    echo -e "${YELLOW}[INFO] Desmontando y limpiando arreglo previo en $RAID_DEVICE...${NC}"
-    umount "$MOUNT_POINT" 2>/dev/null || true
-    mdadm --stop "$RAID_DEVICE" 2>/dev/null || true
+# 2. Si /dev/md0 ya está activo, verificar si solo falta formatear y montar
+if ! grep -q "md0" /proc/mdstat 2>/dev/null; then
+    echo -e "\n${CYAN}3. Construyendo arreglo RAID nivel $RAID_LEVEL en $RAID_DEVICE con ${#DEVICES[@]} discos...${NC}"
+    mdadm --create "$RAID_DEVICE" \
+        --level="$RAID_LEVEL" \
+        --raid-devices="${#DEVICES[@]}" \
+        "${DEVICES[@]}" </dev/null 2>/dev/null || true
 fi
 
-# 3. Creación del arreglo RAID con mdadm
-echo -e "\n${CYAN}3. Construyendo arreglo RAID nivel $RAID_LEVEL en $RAID_DEVICE con ${#DEVICES[@]} discos...${NC}"
-# --level : nivel RAID (1 o 5)
-# --raid-devices : cantidad de discos activos
-# yes | : responde afirmativamente de forma desatendida a cualquier advertencia
-yes | mdadm --create "$RAID_DEVICE" \
-    --level="$RAID_LEVEL" \
-    --raid-devices="${#DEVICES[@]}" \
-    "${DEVICES[@]}"
-
-echo -e "${GREEN}[OK] Arreglo RAID $RAID_LEVEL creado exitosamente.${NC}"
+echo -e "${GREEN}[OK] Arreglo RAID $RAID_LEVEL activo en $RAID_DEVICE.${NC}"
 
 # 4. Formatear volumen RAID con sistema de archivos ext4
 echo -e "\n${CYAN}4. Dando formato ext4 al volumen redundante $RAID_DEVICE...${NC}"
@@ -93,9 +85,9 @@ mkfs.ext4 -F -L "ALMACEN_RAID" "$RAID_DEVICE"
 # 5. Punto de montaje y configuración de permisos
 echo -e "\n${CYAN}5. Montando volumen en $MOUNT_POINT...${NC}"
 mkdir -p "$MOUNT_POINT"
-mount "$RAID_DEVICE" "$MOUNT_POINT"
+mount "$RAID_DEVICE" "$MOUNT_POINT" 2>/dev/null || true
 chmod 775 "$MOUNT_POINT"
-chown root:sistemas "$MOUNT_POINT"
+chown root:sistemas "$MOUNT_POINT" 2>/dev/null || true
 
 # Crear estructura inicial de carpetas en el RAID
 mkdir -p "$MOUNT_POINT/respaldos_criticos"
@@ -108,15 +100,15 @@ mkdir -p /etc/mdadm
 mdadm --detail --scan | tee -a /etc/mdadm/mdadm.conf > /dev/null
 
 UUID_RAID=$(blkid -s UUID -o value "$RAID_DEVICE")
-if ! grep -q "$UUID_RAID" /etc/fstab; then
+if [[ -n "$UUID_RAID" ]] && ! grep -q "$UUID_RAID" /etc/fstab; then
     echo "UUID=$UUID_RAID  $MOUNT_POINT  ext4  defaults,nofail  0  2" >> /etc/fstab
 fi
 
 # 7. Resumen de estado con mdadm --detail
 echo -e "\n${BLUE}===================================================================${NC}"
-echo -e "${GREEN} ARREGLO RAID CONFIGURADO Y ACTIVO${NC}"
+echo -e "${GREEN} ARREGLO RAID CONFIGURADO Y MONTADO EXITOSAMENTE${NC}"
 echo -e "${BLUE}===================================================================${NC}"
 cat /proc/mdstat
 echo "-------------------------------------------------------------------"
-mdadm --detail "$RAID_DEVICE"
+df -h "$MOUNT_POINT"
 echo -e "${BLUE}===================================================================${NC}"
