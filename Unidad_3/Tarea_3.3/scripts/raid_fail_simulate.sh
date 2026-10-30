@@ -96,6 +96,12 @@ case "$ACTION" in
         echo -e "${CYAN} RECONSTRUCCIÓN (HOT REBUILD) CON DISCO: $TARGET_DEV${NC}"
         echo -e "${CYAN}===================================================================${NC}"
 
+        # Si el disco sigue enganchado como faulty, removerlo primero automáticamente
+        if mdadm --detail "$RAID_DEVICE" | grep -q "faulty.*$TARGET_DEV"; then
+            echo -e "${YELLOW}[INFO] Desvinculando disco defectuoso previo...${NC}"
+            mdadm --manage "$RAID_DEVICE" --remove "$TARGET_DEV" 2>/dev/null || true
+        fi
+
         mdadm --manage "$RAID_DEVICE" --add "$TARGET_DEV"
         echo -e "${GREEN}[OK] Disco $TARGET_DEV insertado. Iniciando sincronización de paridad/espejo...${NC}"
 
