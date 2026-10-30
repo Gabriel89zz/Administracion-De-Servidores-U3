@@ -3,75 +3,105 @@
 **Carrera:** Ingeniería en Informática  
 **Tema:** Automatización de administración de usuarios, grupos y políticas de acceso  
 **Requisito indispensable:** Cámara web visible en la **esquina inferior derecha** todo el tiempo.  
-**Duración objetivo:** ~3 a 4 minutos (dinámico, al grano y sin rollos largos).
+**Duración estimada:** ~4 a 5 minutos (conectado, fluido y con explicaciones técnicas claras).
 
 ---
 
-## Tips rápidos antes de grabar:
-1. Revisa que tu OBS o grabador tenga tu cámara en la esquina inferior derecha.
-2. Ten la terminal lista en la carpeta de la práctica:
-   ```bash
-   cd ~/Administracion-De-Servidores-U3/Unidad_3/Tarea_3.1/
-   ```
-3. Si la VM ya tenía usuarios creados, recuerda revertir al snapshot limpio de VMware antes de darle "Rec".
+## 📌 Contexto inicial antes de grabar:
+* Tener la terminal abierta en la carpeta de la práctica:
+  ```bash
+  cd ~/Administracion-De-Servidores-U3/Unidad_3/Tarea_3.1/
+  ```
+* En este video ejecutaremos en orden exacto los comandos de las **Instrucciones Rápidas de Ejecución del README**:
+  1. `chmod +x scripts/*.sh`
+  2. `sudo ./scripts/provision_users.sh scripts/usuarios.csv`
+  3. `sudo ./scripts/apply_security.sh`
+  4. `sudo ./scripts/verify_system.sh check`
+  5. `sudo ./scripts/deprovision_users.sh -l mariana.solis`
+  6. `sudo ./scripts/verify_system.sh unlock luis.torres`
 
 ---
 
 ## 🎬 Minuto a Minuto del Video
 
 ### 1. Introducción y Contexto (00:00 - 00:45)
-* **Qué hacer en pantalla:** Terminal visible con la cámara activa abajo a la derecha. Puedes mostrar un `cat /etc/os-release` rápido o dejar la terminal limpia.
+* **Qué hacer en pantalla:** Terminal limpia con la cámara web activa en la esquina inferior derecha.
 * **Qué decir:**
-  > "Qué tal a todos, mi nombre es [Tu Nombre], estudiante de la carrera de Ingeniería en Informática, y este video es para la materia de Administración de Servidores.  
-  > En esta práctica vamos a ver la Tarea 3.1 de la Unidad 3, enfocada en la gestión automatizada de usuarios, grupos y políticas de seguridad.  
-  > Como contexto rápido: estamos trabajando sobre una máquina virtual con Debian Server montada en VMware Workstation. Usamos una máquina virtual porque nos da un entorno aislado y seguro donde podemos aplicar directivas críticas del sistema operativo, manipular PAM, sudoers y particiones sin poner en riesgo nuestro equipo principal de uso diario, además de que nos permite simular el comportamiento real de un servidor empresarial dedicado.  
-  > Así que vamos a darle directo a las pruebas en consola."
+  > "Qué tal a todos, mi nombre es [Tu Nombre], estudiante de la carrera de Ingeniería en Informática, y este video corresponde a la materia de Administración de Servidores.  
+  > Hoy vamos a desarrollar la Tarea 3.1 de la Unidad 3, enfocada en la automatización de usuarios, grupos departamentales y directivas de seguridad.  
+  > Como contexto importante: toda esta práctica la estamos realizando dentro de una máquina virtual con Debian Server sobre VMware Workstation. Trabajar en un entorno virtualizado es indispensable en administración de servidores porque nos provee un entorno aislado y seguro donde podemos manipular directivas de bajo nivel como módulos PAM, reglas de sudoers y cuentas del sistema operativo sin poner en riesgo nuestra máquina anfitriona física, permitiéndonos simular con exactitud cómo operaría un servidor empresarial dedicado.  
+  > Vamos a comenzar preparando los permisos y ejecutando los comandos en el orden exacto del README."
 
 ---
 
-### 2. Creación Masiva de Usuarios por Lotes (00:45 - 01:45)
+### 2. Permisos y Aprovisionamiento Masivo (Paso 1 y 2 del README) (00:45 - 01:50)
 * **Comandos en consola:**
   ```bash
-  cat scripts/usuarios.csv
+  chmod +x scripts/*.sh
   sudo ./scripts/provision_users.sh scripts/usuarios.csv
   ```
 * **Qué decir:**
-  > "Primero les muestro nuestro archivo `usuarios.csv`. Aquí tenemos definidos los usuarios divididos en áreas departamentales como Sistemas, Finanzas, Operaciones y Dirección, cada uno con una contraseña temporal y su fecha de expiración.  
-  > Ahora ejecutamos el script de aprovisionamiento masivo: `sudo ./scripts/provision_users.sh scripts/usuarios.csv`.  
-  > Como pueden ver, el script lee el archivo, crea automáticamente los grupos si no existían, da de alta a cada usuario con `useradd`, inyecta la contraseña temporal y además le aplica la directiva `chage -d 0` para obligarlos a cambiar su clave la primera vez que inicien sesión. También aplica permisos 750 a cada carpeta home."
+  > "Iniciamos otorgando permisos de ejecución a nuestros scripts en Bash mediante `chmod +x scripts/*.sh`.  
+  > Ahora procedemos con el paso 2 del README: ejecutar la provisión automatizada con `sudo ./scripts/provision_users.sh scripts/usuarios.csv`.  
+  > ¿Qué está sucediendo aquí técnicamente? El script lee un archivo delimitado por comas donde están definidos los empleados divididos en cuatro departamentos: Sistemas, Finanzas, Operaciones y Dirección.  
+  > Por cada registro, el script valida si el grupo departamental existe; si no, lo crea con `groupadd`. Después invoca `useradd` para dar de alta la cuenta con su propio directorio `/home`, le asigna una shell `/bin/bash` y establece una fecha de caducidad.  
+  > Además, mediante `chpasswd` inyecta una contraseña provisional y con la herramienta `chage -d 0` fuerza a que el usuario deba cambiar su clave obligatoriamente en su primer inicio de sesión.  
+  > Y en cuanto a permisos de archivos, aplica un modo octal estricto **750** (`rwxr-x---`) en cada home. Esto significa que el dueño tiene control total, los compañeros de su mismo grupo departamental tienen lectura y ejecución, pero el resto de usuarios ajenos al área tienen cero permisos, garantizando el aislamiento de datos entre departamentos."
 
 ---
 
-### 3. Aislamiento de Homes y Cambio Forzado de Clave (01:45 - 02:30)
-* **Comandos en consola:**
-  ```bash
-  ls -ld /home/*
-  su - carlos.mendoza
-  ```
-  *(Ingresas la contraseña temporal `TempPassTI2026!`. El sistema te pedirá cambiarla de inmediato; pon una nueva clave, dale Enter y escribe `exit`).*
-* **Qué decir:**
-  > "Si listamos `/home` con `ls -ld /home/*`, vemos que todos los directorios tienen permisos `drwxr-x---`, es decir, modo 750. Esto significa que ningún usuario de un departamento puede entrar a husmear en los archivos de otro.  
-  > Y para probar la expiración de credenciales, iniciamos sesión como `carlos.mendoza`. Introducimos su contraseña temporal y el sistema de inmediato nos frena y nos exige cambiarla: 'You are required to change your password immediately'. Hasta que no definimos una contraseña nueva no nos deja trabajar. Salimos con `exit`."
+### 🟢 Conexión hacia el Paso 3:
+> *"Una vez que nuestras cuentas ya están creadas y con sus carpetas protegidas, el siguiente paso indispensable en el ciclo de vida del servidor es blindar el acceso mediante directivas de seguridad a nivel de sistema. Por eso pasamos al paso 3: aplicar las reglas de sudoers, control de horarios y protección contra fuerza bruta."*
 
 ---
 
-### 4. Directivas de Seguridad: Sudoers, PAM y Desbloqueo (02:30 - 03:30)
+### 3. Aplicar Políticas de Seguridad (Paso 3 del README) (01:50 - 02:45)
 * **Comandos en consola:**
   ```bash
   sudo ./scripts/apply_security.sh
-  sudo ./scripts/verify_system.sh check
   ```
 * **Qué decir:**
-  > "Ahora aplicamos las directivas de seguridad con `sudo ./scripts/apply_security.sh`. Esto configura tres cosas clave:  
-  > Uno: control de sudoers delegado al grupo 'sistemas' con logs auditados en `/var/log/sudo_sistemas.log`.  
-  > Dos: control de horarios con `pam_time`, para que usuarios de Finanzas y Operaciones solo puedan acceder en horario laboral.  
-  > Tres: protección contra ataques de fuerza bruta con `pam_faillock`.  
-  > Para comprobar que todo quedó bien, corremos nuestra herramienta de auditoría: `sudo ./scripts/verify_system.sh check`.  
-  > Aquí vemos en un solo vistazo el aislamiento de directorios, las fechas de caducidad con `chage` y las políticas activas de PAM."
+  > "Ejecutamos el paso 3: `sudo ./scripts/apply_security.sh`.  
+  > Este script interactúa directamente con el núcleo de seguridad de Linux y configura tres pilares fundamentales:  
+  > Primero: la delegación administrativa con **Sudoers**. En lugar de darle permisos de superusuario a cualquiera, se crea una regla específica en `/etc/sudoers.d/` para el grupo 'sistemas'. Esta directiva exige que el usuario confirme su propia contraseña al usar `sudo` y registra cada comando ejecutado en una bitácora de auditoría en `/var/log/sudo_sistemas.log`.  
+  > Segundo: restricción de franjas horarias mediante el módulo **`pam_time`** en `/etc/security/time.conf`. Con esto garantizamos que departamentos como Finanzas y Operaciones solo puedan iniciar sesión de lunes a viernes en horario laboral (de 8 a 17 y 18 horas), mientras que TI mantiene disponibilidad 24/7.  
+  > Y tercero: protección activa contra ataques de fuerza bruta o diccionario mediante el módulo **`pam_faillock`**. Este módulo monitorea los intentos de autenticación: si alguien falla su contraseña tres veces consecutivas, su cuenta se bloquea automáticamente durante 300 segundos."
 
 ---
 
-### 5. Cierre Rápido (03:30 - 03:50)
+### 🟢 Conexión hacia el Paso 4:
+> *"Ahora bien, como administradores no podemos dar por hecho que las directivas funcionan solo porque el script terminó. Necesitamos una herramienta que audite el estado real del kernel y de las cuentas. Por eso, en el paso 4 ejecutaremos nuestro script de auditoría integral."*
+
+---
+
+### 4. Auditoría Integral del Sistema (Paso 4 del README) (02:45 - 03:45)
+* **Comandos en consola:**
+  ```bash
+  sudo ./scripts/verify_system.sh check
+  ```
 * **Qué decir:**
-  > "Como demostración final, si requerimos dar de baja o congelar a un usuario de forma segura, contamos con `deprovision_users.sh`, que permite suspender la cuenta o respaldar su directorio home antes de borrarlo.  
-  > Con esto cubrimos al 100% los requisitos de la Tarea 3.1. Todos los scripts y la documentación están en el repositorio de GitHub. ¡Muchas gracias por ver el video!"
+  > "Corremos el paso 4: `sudo ./scripts/verify_system.sh check`.  
+  > Miren la pantalla, esta herramienta concentra en una sola vista toda la evidencia técnica:  
+  > En la sección 1 validamos el **aislamiento de directorios**: todas las carpetas en `/home` muestran `drwxr-x--- (750)`, demostrando que un usuario de Operaciones no tiene forma de leer el home de Finanzas.  
+  > En la sección 2 auditamos el **envejecimiento de credenciales** con `chage -l`. Observen que dice: 'Último cambio de contraseña: se debe cambiar la contraseña' y muestra la fecha exacta en que caduca la cuenta.  
+  > En la sección 3 revisamos la tabla de `faillock` para verificar los registros de intentos fallidos.  
+  > Y en las secciones 4 y 5 confirmamos la regla de sudoers con logs dedicados y las restricciones horarias activas en `time.conf`."
+
+---
+
+### 🟢 Conexión hacia el Paso 5:
+> *"Ya comprobamos que los usuarios existen, que las directivas están activas y que el sistema está auditado. Pero la administración de servidores también exige saber qué hacer ante contingencias: ¿cómo congelamos a un empleado que deja la empresa o cómo desbloqueamos a un usuario que se equivocó de clave? Eso es lo que probaremos en el paso 5 final."*
+
+---
+
+### 5. Desaprovisionamiento Seguro y Desbloqueo (Paso 5 del README) (03:45 - 04:30)
+* **Comandos en consola:**
+  ```bash
+  sudo ./scripts/deprovision_users.sh -l mariana.solis
+  sudo ./scripts/verify_system.sh unlock luis.torres
+  ```
+* **Qué decir:**
+  > "Concluimos con el paso 5. Primero simulamos la baja o suspensión controlada de un empleado con: `sudo ./scripts/deprovision_users.sh -l mariana.solis`.  
+  > El parámetro `-l` realiza un 'soft lock': termina cualquier proceso que el usuario tenga corriendo en segundo plano con `pkill`, bloquea la contraseña y cambia su shell a `/sbin/nologin`. Con esto el usuario queda fuera del servidor al instante, pero sus archivos quedan intactos para cualquier auditoría.  
+  > Y si en el día a día un usuario legítimo como Luis Torres bloquea su cuenta por escribir mal su clave tres veces, el administrador no tiene que esperar a que expire el tiempo; simplemente ejecuta: `sudo ./scripts/verify_system.sh unlock luis.torres`, lo cual restablece a cero los contadores de `faillock` y le devuelve el acceso de inmediato.  
+  > Con esta demostración práctica cubrimos todos los requerimientos de la Tarea 3.1. Todos los scripts, configuraciones y el manual técnico en PDF se encuentran en el repositorio de GitHub. ¡Muchas gracias por acompañarme en este video!"
