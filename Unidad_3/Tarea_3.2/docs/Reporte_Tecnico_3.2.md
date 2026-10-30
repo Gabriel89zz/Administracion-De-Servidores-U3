@@ -112,18 +112,19 @@ getfacl /srv/compartido/finanzas
 **Resultado esperado:**
 * `/srv/compartido/publico` muestra `drwxrwxrwt` (`t` indica Sticky bit).
 * `/srv/compartido/finanzas` muestra `drwxrws---+` (`s` indica SGID, `+` indica ACLs activas).
-> **[ESPACIO PARA CAPTURA DE PANTALLA 1]**  
-> *Captura mostrando la salida de `ls -ld` y el reporte de `getfacl` con las directivas default y de usuaria.*
+
+![Permisos SGID, Sticky Bit y ACLs](capturas/01_permisos_sgid_sticky_acls.png)
 
 ---
 
 ### Prueba 2: Verificación de Cuotas de Disco con `repquota`
 **Comando ejecutado:**
 ```bash
-sudo repquota -as
+sudo ./scripts/setup_quotas.sh setup
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 2]**  
-> *Captura del reporte `repquota` con los límites soft y hard de ana.morales y del grupo finanzas.*
+![Inicialización de cuotas y fstab](capturas/02_inicializacion_cuotas_ext4.png)
+
+![Reporte de cuotas con repquota](capturas/03_reporte_repquota.png)
 
 ---
 
@@ -134,10 +135,9 @@ sudo ./scripts/setup_quotas.sh test ana.morales
 ```
 **Salida de error capturada:**
 ```text
-dd: error writing 'test_overflow.bin': Disk quota exceeded
+dd: error al escribir en '/home/ana.morales/prueba_cuota/test_overflow.bin': Se ha excedido la cuota de disco
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 3]**  
-> *Captura de pantalla mostrando la interrupción de escritura por el kernel con el error de cuota excedida.*
+![Límite duro de cuota excedido](capturas/04_limite_duro_excedido.png)
 
 ---
 
@@ -145,11 +145,8 @@ dd: error writing 'test_overflow.bin': Disk quota exceeded
 **Comando ejecutado:**
 ```bash
 sudo ./scripts/backup.sh full
-cat /var/log/backup_system.log | tail -n 15
-ls -lh /var/backups/sistema/
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 4]**  
-> *Captura del log de respaldo con la confirmación de verificación de integridad y el hash SHA256.*
+![Respaldo completo con firma SHA256](capturas/05_backup_full_sha256.png)
 
 ---
 
@@ -160,12 +157,13 @@ sudo ./scripts/restore.sh test
 ```
 **Flujo demostrado:**
 1. Creación del archivo crítico `/srv/compartido/finanzas/balance_general_confidencial.txt`.
-2. Generación del respaldo.
+2. Generación del respaldo automatizado.
+![Creación de documento y respaldo](capturas/06_restauracion_creacion_documento.png)
+
 3. Borrado definitivo simulado con `rm -f`.
 4. Ejecución del script `restore.sh` con validación SHA256 y extracción.
-5. Verificación de existencia y visualización del contenido idéntico recuperado.
-> **[ESPACIO PARA CAPTURA DE PANTALLA 5]**  
-> *Captura de la prueba de contingencia demostrando la recuperación completa del archivo borrado.*
+5. Verificación de existencia y comprobación del contenido idéntico recuperado (`[PRUEBA SUPERADA]`).
+![Restauración exitosa de archivos borrados](capturas/07_restauracion_exitosa_prueba_superada.png)
 
 ---
 

@@ -149,57 +149,51 @@ FASE 1: ESTADO ÓPTIMO           FASE 2: FALLO INDUCIDO             FASE 3: RECO
 
 ## 6. Pruebas y Evidencias de Validación
 
-### Prueba 1: Estado Inicial del Arreglo RAID con `mdadm --detail`
+### Prueba 1: Creación del Arreglo RAID 5, Formato y Montaje
 **Comando:**
 ```bash
-sudo mdadm --detail /dev/md0
+sudo ./scripts/setup_raid.sh /dev/sdb /dev/sdc /dev/sdd
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 1]**  
-> *Captura mostrando el estado `clean`, nivel RAID 5, 3 dispositivos activos y el tamaño de volumen.*
+![Arreglo RAID 5 creado, formateado y montado](capturas/01_setup_raid5_montaje.png)
 
 ---
 
-### Prueba 2: Evidencia del Arreglo Degradado tras Simulación de Desconexión
+### Prueba 2: Evidencia del Arreglo Degradado tras Simulación de Fallo
 **Comando:**
 ```bash
 sudo ./scripts/raid_fail_simulate.sh fail
-cat /proc/mdstat
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 2]**  
-> *Captura de la salida del terminal mostrando el indicador `[_UU]` y el disco marcado como `faulty`.*
+![Arreglo RAID en estado degradado](capturas/03_raid_fallo_degradado.png)
 
 ---
 
 ### Prueba 3: Evidencia de la Reconstrucción en Caliente (*Hot Rebuild*)
 **Comando:**
 ```bash
-sudo ./scripts/raid_fail_simulate.sh rebuild
-cat /proc/mdstat
+sudo ./scripts/raid_fail_simulate.sh rebuild /dev/sdb
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 3]**  
-> *Captura de la barra de progreso de `recovery = XX%` en `/proc/mdstat` y el retorno al estado saludable.*
+![Reconstrucción del arreglo RAID](capturas/04_raid_rebuild_en_caliente.png)
 
 ---
 
-### Prueba 4: Verificación del Recurso Compartido Samba
-**Comandos:**
+### Prueba 4: Despliegue y Verificación del Recurso Compartido Samba (NAS)
+**Comando:**
 ```bash
-testparm -s
-smbclient -L localhost -U carlos.mendoza%SambaPass2026!
+sudo ./scripts/setup_samba.sh
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 4]**  
-> *Captura listando los recursos compartidos `AlmacenRAID` y `Publico` visibles a través del protocolo SMB.*
+![Servidor Samba compartiendo el arreglo RAID](capturas/02_setup_samba_nas.png)
 
 ---
 
-### Prueba 5: Verificación de Servidor CUPS y Colas de Impresión
+### Prueba 5: Configuración del Servidor CUPS y Colas de Impresión
 **Comandos:**
 ```bash
+sudo ./scripts/setup_cups.sh setup
 sudo ./scripts/setup_cups.sh test-print
-lpstat -p -d
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 5]**  
-> *Captura de las colas de impresión activas `Cola_Estandar` y `Cola_Urgente` y los trabajos procesados con sus prioridades.*
+![Configuración de colas CUPS](capturas/05_setup_cups_colas.png)
+
+![Prueba de impresión con prioridades](capturas/06_cups_test_print_prioridades.png)
 
 ---
 

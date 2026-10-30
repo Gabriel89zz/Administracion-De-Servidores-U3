@@ -147,8 +147,7 @@ A continuación se presentan los procedimientos de verificación con los comando
 ```bash
 sudo ./scripts/provision_users.sh scripts/usuarios.csv
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 1]**  
-> *Captura de la salida del terminal mostrando el resumen de usuarios creados con los indicadores `[OK]` en color verde.*
+![Creación por lotes de usuarios](capturas/01_provision_usuarios.png)
 
 ---
 
@@ -162,8 +161,7 @@ su - luis.torres -c "ls -la /home/ana.morales"
 ```text
 ls: cannot open directory '/home/ana.morales': Permission denied
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 2]**  
-> *Captura demostrando el listado `ls -ld /home/*` con permisos 750 y el intento denegado de acceso cruzado interdepartamental.*
+![Aislamiento de directorios y acceso denegado](capturas/02_aislamiento_homes_750.png)
 
 ---
 
@@ -179,8 +177,7 @@ Current password:
 New password: 
 Retype new password: 
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 3]**  
-> *Captura mostrando la solicitud obligatoria de cambio de contraseña por expiración forzada.*
+![Cambio obligatorio de contraseña](capturas/03_cambio_clave_forzado.png)
 
 ---
 
@@ -193,45 +190,26 @@ sudo chage -l ana.morales
 * `Account expires`: 2027-06-30
 * `Minimum number of days between password change`: 0
 * `Maximum number of days between password change`: 99999
-> **[ESPACIO PARA CAPTURA DE PANTALLA 4]**  
-> *Captura de pantalla con la salida completa del comando `chage -l`.*
+![Auditoría de envejecimiento con chage](capturas/04_expiracion_chage.png)
 
 ---
 
-### Prueba 5: Simulación de Ataque de Fuerza Bruta y Bloqueo con `pam_faillock`
-Se ingresa de manera interactiva o mediante SSH tres contraseñas incorrectas para el usuario `luis.torres`:
+### Prueba 5: Aplicación de Políticas de Seguridad (PAM y Sudoers)
+Se ejecuta la aplicación centralizada de directivas en el servidor:
 ```bash
-# Intento 1, 2 y 3 con clave errónea
-su - luis.torres
-# Al 4to intento con clave correcta:
-su - luis.torres
-# Salida: Fallo de autenticación inmediato por bloqueo temporal.
+sudo ./scripts/apply_security.sh
 ```
-Comprobación del estado en el registro del kernel/PAM:
-```bash
-sudo faillock --user luis.torres
-```
-**Salida de validación:**
-```text
-luis.torres:
-When                Type  Source Failed
-2026-10-29 16:30:12 TTY   tty1   1
-2026-10-29 16:30:15 TTY   tty1   2
-2026-10-29 16:30:18 TTY   tty1   3
-```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 5]**  
-> *Captura del comando `faillock` mostrando los 3 intentos fallidos y el bloqueo activo.*
+![Políticas de seguridad aplicadas](capturas/05_politicas_seguridad_pam_sudoers.png)
 
 ---
 
-### Prueba 6: Elevación de Privilegios y Auditoría de Sudoers
-El usuario `carlos.mendoza` ejecuta una orden administrativa y se inspecciona el archivo de log dedicado:
+### Prueba 6: Desaprovisionamiento Seguro y Desbloqueo de Cuentas
+Se demuestra el bloqueo controlado de un usuario (`mariana.solis`) mediante `deprovision_users.sh -l` y su posterior reactivación con `verify_system.sh unlock`:
 ```bash
-sudo -u carlos.mendoza sudo apt-get update
-sudo cat /var/log/sudo_sistemas.log | tail -n 5
+sudo ./scripts/deprovision_users.sh -l mariana.solis
+sudo ./scripts/verify_system.sh unlock mariana.solis
 ```
-> **[ESPACIO PARA CAPTURA DE PANTALLA 6]**  
-> *Captura mostrando la entrada de auditoría generada en `/var/log/sudo_sistemas.log`.*
+![Desaprovisionamiento y desbloqueo](capturas/06_deprovision_bloqueo.png)
 
 ---
 
