@@ -72,6 +72,7 @@ case "$ACTION" in
         echo -e "${CYAN} SIMULACIÓN EN VIVO: PÉRDIDA Y RECUPERACIÓN DE DATOS (RTO/RPO)${NC}"
         echo -e "${BLUE}===================================================================${NC}"
 
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
         DOC_TEST="/srv/compartido/finanzas/balance_general_confidencial.txt"
         mkdir -p "/srv/compartido/finanzas"
 
@@ -88,7 +89,7 @@ EOF
         cat "$DOC_TEST"
 
         echo -e "\n${CYAN}2. Ejecutando respaldo automático completo...${NC}"
-        ./backup.sh full
+        "$SCRIPT_DIR/backup.sh" full
 
         LATEST_BACKUP=$(ls -t /var/backups/sistema/backup_FULL_*.tar.gz | head -n 1)
         echo -e "${GREEN}[OK] Respaldo generado: $LATEST_BACKUP${NC}"
@@ -100,7 +101,7 @@ EOF
         fi
 
         echo -e "\n${YELLOW}4. EJECUTANDO RECUPERACIÓN A PARTIR DEL RESPALDO...${NC}"
-        ./restore.sh restore "$LATEST_BACKUP" "/"
+        "$SCRIPT_DIR/restore.sh" restore "$LATEST_BACKUP" "/"
 
         echo -e "\n${CYAN}5. VERIFICACIÓN DEL ARCHIVO RECUPERADO:${NC}"
         if [[ -f "$DOC_TEST" ]]; then
