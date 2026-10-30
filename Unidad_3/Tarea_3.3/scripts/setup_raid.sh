@@ -76,14 +76,13 @@ fi
 
 # 3. Creación del arreglo RAID con mdadm
 echo -e "\n${CYAN}3. Construyendo arreglo RAID nivel $RAID_LEVEL en $RAID_DEVICE con ${#DEVICES[@]} discos...${NC}"
-# --yes : responde sí automáticamente a avisos
 # --level : nivel RAID (1 o 5)
 # --raid-devices : cantidad de discos activos
-mdadm --create "$RAID_DEVICE" \
+# yes | : responde afirmativamente de forma desatendida a cualquier advertencia
+yes | mdadm --create "$RAID_DEVICE" \
     --level="$RAID_LEVEL" \
     --raid-devices="${#DEVICES[@]}" \
-    "${DEVICES[@]}" \
-    --yes
+    "${DEVICES[@]}"
 
 echo -e "${GREEN}[OK] Arreglo RAID $RAID_LEVEL creado exitosamente.${NC}"
 
