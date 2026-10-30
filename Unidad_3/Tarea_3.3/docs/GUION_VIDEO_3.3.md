@@ -1,121 +1,85 @@
-# GUION TÉCNICO PARA GRABACIÓN DE VIDEO: TAREA 3.3
-**Plataforma de entrega:** YouTube (Enlace Público / Oculto)  
-**Requisito de Rúbrica:** Cámara web visible y activa en la **esquina inferior derecha** durante toda la grabación.  
-**Duración recomendada:** Entre 5 y 7 minutos.  
-**Resolución recomendada:** 1080p (1920x1080), tamaño de fuente de terminal de 16pt o superior.
+# GUION PARA VIDEO: TAREA 3.3
+**Materia:** Administración de Servidores  
+**Carrera:** Ingeniería en Informática  
+**Tema:** Almacenamiento redundante (RAID 5 / NAS Samba) y Servidor de impresión CUPS  
+**Requisito indispensable:** Cámara web visible en la **esquina inferior derecha** todo el tiempo.  
+**Duración objetivo:** ~3 a 4 minutos (dinámico y visual).
 
 ---
 
-## Checklist Previo a la Grabación
-
-1. [ ] Cámara web configurada en OBS Studio en la **esquina inferior derecha**.
-2. [ ] Arreglo RAID creado y montado con los discos de VMware: `sudo ./scripts/setup_raid.sh /dev/sdb /dev/sdc /dev/sdd`.
-3. [ ] Samba desplegado: `sudo ./scripts/setup_samba.sh`.
-4. [ ] CUPS configurado y activo: `sudo ./scripts/setup_cups.sh setup`.
-5. [ ] Terminal con pestañas o ventanas limpias y legibles.
-
----
-
-## Estructura Cronológica del Video
-
-```
-00:00 - 00:45 | Introducción, presentación personal y objetivos de la Tarea 3.3
-00:45 - 02:00 | Inspección del Arreglo RAID 5 en Estado Óptimo (mdadm --detail)
-02:00 - 03:00 | Verificación del Almacenamiento Compartido en Red (Samba/NAS)
-03:00 - 04:15 | Simulación de Desconexión de Disco y Estado Degradado ([_UU])
-04:15 - 05:15 | Reemplazo de Disco y Monitoreo de Reconstrucción en Caliente (Rebuild)
-05:15 - 06:30 | Demostración del Servidor de Impresión CUPS y Prueba de Impresión en Red
-06:30 - 07:00 | Conclusiones Generales y Cierre
-```
+## Tips rápidos antes de grabar:
+1. Revisa tu cámara en la esquina inferior derecha.
+2. Abre la terminal en la carpeta de la Tarea 3.3:
+   ```bash
+   cd ~/Administracion-De-Servidores-U3/Unidad_3/Tarea_3.3/
+   ```
 
 ---
 
-## Escena 1: Introducción y Presentación (00:00 - 00:45)
-* **Visual:** Terminal despejada, cámara web en la esquina inferior derecha.
-* **Locución (Qué decir):**
-  > *"Hola a todos, mi nombre es [Tu Nombre], estudiante de la materia Administración de Servidores. En esta última entrega demostraremos la Tarea 3.3: Configuración de almacenamiento redundante mediante RAID por software, montaje de una unidad compartida en red mediante Samba y la puesta en marcha de un servidor de impresión corporativo con CUPS sobre Debian GNU/Linux.*  
-  > *Veremos en directo la resiliencia del sistema simulando la pérdida física de un disco, su reconstrucción en caliente sin pérdida de servicio y pruebas de envío de trabajos con diferentes prioridades de impresión."*
+## 🎬 Minuto a Minuto del Video
+
+### 1. Introducción y Contexto (00:00 - 00:45)
+* **Qué hacer en pantalla:** Terminal visible con la cámara activa abajo a la derecha.
+* **Qué decir:**
+  > "Qué tal a todos, mi nombre es [Tu Nombre], estudiante de Ingeniería en Informática en la materia de Administración de Servidores. En este video realizamos la demostración práctica de la Tarea 3.3 de la Unidad 3: almacenamiento redundante con RAID por software, unidad de red compartida con Samba y servidor de impresión con CUPS.  
+  > Seguimos utilizando nuestra máquina virtual con Debian Server en VMware Workstation. Una de las grandes ventajas de usar una máquina virtual para esta práctica es que pudimos agregar 3 discos duros virtuales independientes de 2 GB cada uno para armar un RAID 5 real por software y simular la falla física de un disco en caliente sin peligro de dañar nuestro hardware real. Vamos a ver cómo funciona."
 
 ---
 
-## Escena 2: Inspección de Discos y Estado del RAID (00:45 - 02:00)
-* **Visual:** Ejecutar comandos de discos y estado del RAID.
-* **Comandos a teclear:**
+### 2. Discos de VMware y Estado del RAID 5 (00:45 - 01:30)
+* **Comandos en consola:**
   ```bash
   lsblk
   cat /proc/mdstat
-  sudo mdadm --detail /dev/md0
   df -h /mnt/almacen_redundante
   ```
-* **Locución (Qué decir):**
-  > *"Comenzamos revisando los dispositivos de almacenamiento con lsblk. Podemos observar nuestros discos de VMware: sda para el sistema base, y sdb, sdc y sdd que conforman nuestro arreglo RAID.*  
-  > *Al consultar /proc/mdstat vemos que el dispositivo /dev/md0 está activo bajo RAID 5 con 3 discos sincronizados, indicado por la bandera [3/3] [UUU].*  
-  > *Con mdadm --detail confirmamos el estado 'clean' y un volumen montado en /mnt/almacen_redundante listo para tolerar fallos."*
+* **Qué decir:**
+  > "Primero ejecutamos `lsblk`. Aquí podemos ver nuestros discos virtuales agregados en VMware: `sda` donde vive el sistema operativo Debian, y `sdb`, `sdc` y `sdd` que son los 3 discos asignados a nuestro arreglo.  
+  > Al consultar `/proc/mdstat` vemos que el dispositivo `/dev/md0` está activo bajo RAID 5 con los 3 miembros sincronizados, indicado por la bandera `[3/3] [UUU]`.  
+  > Y con `df -h /mnt/almacen_redundante` comprobamos que el volumen formateado en ext4 está montado y listo con casi 4 Gigas utilizables, justo lo que dicta la fórmula de RAID 5: N menos un discos."
 
 ---
 
-## Escena 3: Almacenamiento Compartido en Red (Samba) (02:00 - 03:00)
-* **Visual:** Mostrar configuración de Samba y probar acceso local.
-* **Comandos a teclear:**
+### 3. Unidad Compartida en Red con Samba (01:30 - 02:00)
+* **Comandos en consola:**
   ```bash
-  cat configs/smb.conf | grep -A 8 '\[AlmacenRAID\]'
-  sudo smbclient -L localhost -N
+  sudo ./scripts/setup_samba.sh
   ```
-* **Locución (Qué decir):**
-  > *"Sobre este volumen de alta disponibilidad levantamos un servidor NAS mediante Samba. En la configuración de smb.conf, el recurso compartido 'AlmacenRAID' apunta directamente a la carpeta montada sobre el RAID, garantizando que todos los archivos que los usuarios de los departamentos almacenen cuenten con redundancia a nivel de bloques.*  
-  > *Al listar los recursos con smbclient comprobamos que tanto la unidad AlmacenRAID como el área Pública están disponibles para cualquier cliente Windows o Linux de la red."*
+* **Qué decir:**
+  > "Sobre este almacenamiento de alta disponibilidad montamos un servidor NAS usando Samba con `sudo ./scripts/setup_samba.sh`.  
+  > El script valida la configuración con `testparm` y activa las credenciales de red para nuestros usuarios departamentales. De esta forma, el recurso compartido `AlmacenRAID` vive directamente sobre el arreglo redundante, protegiendo todos los archivos que los usuarios guarden en la red local."
 
 ---
 
-## Escena 4: Simulación de Desconexión de Disco y Estado Degradado (03:00 - 04:15)
-* **Visual:** Provocar la falla con el script y observar `/proc/mdstat`.
-* **Comandos a teclear:**
+### 4. Simulación de Falla de Disco y Reconstrucción en Caliente (02:00 - 03:00)
+* **Comandos en consola:**
   ```bash
   sudo ./scripts/raid_fail_simulate.sh fail
   cat /proc/mdstat
-  sudo mdadm --detail /dev/md0
-  # Demostrar que los datos siguen accesibles:
-  ls -lh /mnt/almacen_redundante/
-  ```
-* **Locución (Qué decir):**
-  > *"Ahora simularemos la avería o desconexión imprevista de uno de los discos del arreglo utilizando nuestro script de simulación.*  
-  > *Noten de inmediato la salida de /proc/mdstat: el disco sdb ha pasado a estado faulty '(F)' y el arreglo cambia a modo DEGRADADO: [3/2] [_UU].*  
-  > *Lo extraordinario de RAID 5 es que, a pesar de que el disco sdb está averiado, listamos /mnt/almacen_redundante y los archivos siguen totalmente intactos y disponibles. El kernel Linux recalcula en tiempo real los datos faltantes a partir de la paridad de sdc y sdd."*
-
----
-
-## Escena 5: Reemplazo y Reconstrucción en Caliente (Hot Rebuild) (04:15 - 05:15)
-* **Visual:** Retirar disco malo, insertar nuevo disco y ver la barra de sincronización.
-* **Comandos a teclear:**
-  ```bash
+  ls -la /mnt/almacen_redundante/
   sudo ./scripts/raid_fail_simulate.sh remove
-  sudo ./scripts/raid_fail_simulate.sh rebuild
+  sudo ./scripts/raid_fail_simulate.sh rebuild /dev/sdb
   cat /proc/mdstat
   ```
-* **Locución (Qué decir):**
-  > *"Para restablecer la salud del servidor, retiramos de forma lógica el disco dañado con --remove e insertamos una unidad de reemplazo con --add.*  
-  > *Observen la consola: el subsistema md inicia de inmediato la reconstrucción o 'recovery' en caliente. La paridad se recalcula y se escribe en el nuevo miembro. Al completarse la barra de progreso al 100%, el arreglo retorna al estado 'clean' con sus 3 miembros activos [UUU], todo esto sin haber apagado el servidor ni un solo segundo."*
+* **Qué decir:**
+  > "Ahora viene la prueba clave: ¿qué pasa si un disco se descompone?  
+  > Simulamos la avería con `sudo ./scripts/raid_fail_simulate.sh fail`.  
+  > Miren `/proc/mdstat`: el disco `sdb` pasa a estado faulty `(F)` y el arreglo entra en modo degradado: `[3/2] [_UU]`.  
+  > Pero a pesar de que el disco falló, listamos `/mnt/almacen_redundante` y los archivos siguen 100% disponibles porque el kernel recalcula la paridad al vuelo.  
+  > Para solucionarlo, retiramos el disco dañado con `remove` y ejecutamos `rebuild /dev/sdb`.  
+  > El sistema inicia la reconstrucción en caliente y vuelve de inmediato al estado saludable `[3/3] [UUU]`, todo sin haber apagado el servidor ni un solo segundo."
 
 ---
 
-## Escena 6: Servidor de Impresión CUPS y Prioridades (05:15 - 06:30)
-* **Visual:** Estado de colas con `lpstat` y prueba de impresión con `setup_cups.sh test-print`.
-* **Comandos a teclear:**
+### 5. Servidor de Impresión CUPS y Prioridades (03:00 - 03:45)
+* **Comandos en consola:**
   ```bash
-  lpstat -p -d
+  sudo ./scripts/setup_cups.sh setup
   sudo ./scripts/setup_cups.sh test-print
-  lpstat -o
   ```
-* **Locución (Qué decir):**
-  > *"Finalmente, pasamos al servidor de impresión periférica administrado por CUPS sobre el puerto TCP 631.*  
-  > *Configuramos dos colas compartidas en red: Cola_Estandar para trabajos habituales y Cola_Urgente para documentos de alta prioridad.*  
-  > *Ejecutamos nuestra prueba técnica: enviamos un primer trabajo con prioridad reducida 20 a la cola estándar, y un segundo trabajo con máxima prioridad 100 a la cola urgente.*  
-  > *Con lpstat -o verificamos cómo el despachador de CUPS procesa y prioriza los documentos en red antes de convertirlos a PDF o enviarlos a la impresora física."*
-
----
-
-## Escena 7: Conclusión General (06:30 - 07:00)
-* **Visual:** Regreso a la terminal principal.
-* **Locución (Qué decir):**
-  > *"Con estas pruebas concluimos la totalidad de los requerimientos de la Unidad 3: automatizamos la identidad y seguridad de usuarios en la 3.1, gobernamos permisos POSIX, cuotas y respaldos en la 3.2, y logramos alta disponibilidad de almacenamiento con RAID, NAS y colas de impresión en la 3.3.*  
-  > *Todos los scripts, configuraciones y manuales técnicos se encuentran disponibles en nuestro repositorio de GitHub. Muchas gracias por acompañarme en este video."*
+  *(Opcional rápido: si tienes abierto el navegador en Windows con `http://192.168.1.175:631/printers/`, puedes cambiar de ventana un segundo para mostrarlo).*
+* **Qué decir:**
+  > "Por último, revisamos el servidor de impresión periférica con CUPS sobre el puerto TCP 631.  
+  > Con `setup_cups.sh` creamos dos colas compartidas: `Cola_Estandar` y `Cola_Urgente`.  
+  > Y al correr `test-print`, enviamos un trabajo con prioridad normal (valor 20) y otro con prioridad alta (valor 100). Con `lpstat -o` comprobamos cómo el despachador de CUPS procesa y prioriza los documentos en red de acuerdo a su urgencia.  
+  > Con esto demostramos la alta disponibilidad en almacenamiento y servicios periféricos de red para la Tarea 3.3 y concluimos la Unidad 3 de Administración de Servidores. ¡Muchas gracias por su atención!"

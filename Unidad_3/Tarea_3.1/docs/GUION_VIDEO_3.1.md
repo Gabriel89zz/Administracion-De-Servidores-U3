@@ -1,128 +1,77 @@
-# GUION TÉCNICO PARA GRABACIÓN DE VIDEO: TAREA 3.1
-**Plataforma de entrega:** YouTube (Enlace Público / Oculto)  
-**Requisito de Rúbrica:** Cámara web visible y activa en la **esquina inferior derecha** durante toda la grabación.  
-**Duración recomendada:** Entre 5 y 7 minutos.  
-**Resolución recomendada:** 1080p (1920x1080), tamaño de fuente de terminal de 16pt o superior para óptima legibilidad.
+# GUION PARA VIDEO: TAREA 3.1
+**Materia:** Administración de Servidores  
+**Carrera:** Ingeniería en Informática  
+**Tema:** Automatización de administración de usuarios, grupos y políticas de acceso  
+**Requisito indispensable:** Cámara web visible en la **esquina inferior derecha** todo el tiempo.  
+**Duración objetivo:** ~3 a 4 minutos (dinámico, al grano y sin rollos largos).
 
 ---
 
-## Checklist Previo a la Grabación (Antes de dar "Rec")
-
-1. [ ] Cámara web configurada en OBS Studio u host en la **esquina inferior derecha**, asegurando que no tape el texto del terminal.
-2. [ ] Máquina virtual Debian encendida y conectada vía SSH o terminal limpia.
-3. [ ] Scripts copiados a la VM con permisos de ejecución: `chmod +x scripts/*.sh`.
-4. [ ] Si ya habías probado el script antes, limpia los usuarios o usa un snapshot limpio para que el video muestre la creación desde cero:
+## Tips rápidos antes de grabar:
+1. Revisa que tu OBS o grabador tenga tu cámara en la esquina inferior derecha.
+2. Ten la terminal lista en la carpeta de la práctica:
    ```bash
-   sudo ./scripts/deprovision_users.sh -d carlos.mendoza
-   sudo ./scripts/deprovision_users.sh -d ana.morales
-   sudo ./scripts/deprovision_users.sh -d luis.torres
-   sudo ./scripts/deprovision_users.sh -d elena.ramirez
-   sudo faillock --reset
+   cd ~/Administracion-De-Servidores-U3/Unidad_3/Tarea_3.1/
    ```
+3. Si la VM ya tenía usuarios creados, recuerda revertir al snapshot limpio de VMware antes de darle "Rec".
 
 ---
 
-## Estructura Cronológica del Video (Minuto a Minuto)
+## 🎬 Minuto a Minuto del Video
 
-```
-00:00 - 00:45 | Introducción, presentación personal y objetivos
-00:45 - 02:00 | Inspección del CSV y Ejecución del Script de Creación Masiva
-02:00 - 03:15 | Demostración de Aislamiento de Homes y Permisos 750
-03:15 - 04:15 | Prueba de Primer Login: Expiración y Cambio Forzado de Contraseña
-04:15 - 05:15 | Demostración de Sudoers y Políticas de Horario (pam_time)
-05:15 - 06:15 | Prueba de Bloqueo por Fuerza Bruta (pam_faillock)
-06:15 - 06:45 | Desaprovisionamiento seguro con respaldo y Cierre
-```
+### 1. Introducción y Contexto (00:00 - 00:45)
+* **Qué hacer en pantalla:** Terminal visible con la cámara activa abajo a la derecha. Puedes mostrar un `cat /etc/os-release` rápido o dejar la terminal limpia.
+* **Qué decir:**
+  > "Qué tal a todos, mi nombre es [Tu Nombre], estudiante de la carrera de Ingeniería en Informática, y este video es para la materia de Administración de Servidores.  
+  > En esta práctica vamos a ver la Tarea 3.1 de la Unidad 3, enfocada en la gestión automatizada de usuarios, grupos y políticas de seguridad.  
+  > Como contexto rápido: estamos trabajando sobre una máquina virtual con Debian Server montada en VMware Workstation. Usamos una máquina virtual porque nos da un entorno aislado y seguro donde podemos aplicar directivas críticas del sistema operativo, manipular PAM, sudoers y particiones sin poner en riesgo nuestro equipo principal de uso diario, además de que nos permite simular el comportamiento real de un servidor empresarial dedicado.  
+  > Así que vamos a darle directo a las pruebas en consola."
 
 ---
 
-## Escena 1: Introducción y Presentación (00:00 - 00:45)
-* **Visual:** Terminal en pantalla completa, cámara web en la esquina inferior derecha.
-* **Acción en pantalla:** Mostrar el comando `cat /etc/os-release` o `hostnamectl` para evidenciar que es Debian.
-* **Locución (Qué decir):**
-  > *"Hola a todos, mi nombre es [Tu Nombre], estudiante de la materia Administración de Servidores. En este video realizaré la demostración práctica de la Tarea 3.1 de la Unidad 3: Automatización de administración de usuarios, grupos y políticas de acceso sobre Debian GNU/Linux.*  
-  > *Demostraremos la provisión de cuentas por lotes a través de un archivo CSV, el aislamiento de directorios personales, la expiración de credenciales, el control de horarios con PAM, el acceso seguro mediante sudoers y la protección ante ataques de fuerza bruta con faillock."*
-
----
-
-## Escena 2: Inspección y Creación por Lotes (00:45 - 02:00)
-* **Visual:** Visualizar el archivo CSV y luego correr el script.
-* **Comandos a teclear:**
+### 2. Creación Masiva de Usuarios por Lotes (00:45 - 01:45)
+* **Comandos en consola:**
   ```bash
   cat scripts/usuarios.csv
   sudo ./scripts/provision_users.sh scripts/usuarios.csv
   ```
-* **Locución (Qué decir):**
-  > *"En pantalla tenemos nuestro archivo CSV con los usuarios divididos en cuatro áreas: Sistemas, Finanzas, Operaciones y Dirección. Cada uno cuenta con una contraseña temporal y fecha de caducidad.*  
-  > *Procedo a ejecutar el script de aprovisionamiento con privilegios de root.*  
-  > *Como pueden observar en la consola, el script crea automáticamente los grupos departamentales si no existen, genera las cuentas con useradd, inyecta la contraseña temporal, fuerza el cambio obligatorio de clave para el primer login con chage y asigna permisos estrictos 750 al directorio home."*
+* **Qué decir:**
+  > "Primero les muestro nuestro archivo `usuarios.csv`. Aquí tenemos definidos los usuarios divididos en áreas departamentales como Sistemas, Finanzas, Operaciones y Dirección, cada uno con una contraseña temporal y su fecha de expiración.  
+  > Ahora ejecutamos el script de aprovisionamiento masivo: `sudo ./scripts/provision_users.sh scripts/usuarios.csv`.  
+  > Como pueden ver, el script lee el archivo, crea automáticamente los grupos si no existían, da de alta a cada usuario con `useradd`, inyecta la contraseña temporal y además le aplica la directiva `chage -d 0` para obligarlos a cambiar su clave la primera vez que inicien sesión. También aplica permisos 750 a cada carpeta home."
 
 ---
 
-## Escena 3: Aislamiento de Directorios Home (02:00 - 03:15)
-* **Visual:** Comprobar permisos con `ls -ld` y hacer una prueba de acceso cruzado denegado.
-* **Comandos a teclear:**
+### 3. Aislamiento de Homes y Cambio Forzado de Clave (01:45 - 02:30)
+* **Comandos en consola:**
   ```bash
   ls -ld /home/*
-  # Probar acceso cruzado: el usuario de operaciones intenta ver el home de finanzas
-  su - luis.torres -c "ls -la /home/ana.morales"
-  ```
-* **Locución (Qué decir):**
-  > *"Para cumplir con el principio de mínimo privilegio y aislamiento de datos, revisamos los permisos en /home. Vemos drwxr-x--- (750). El usuario es dueño de su directorio y su grupo departamental tiene lectura, pero 'otros' no tienen ningún bit activo.*  
-  > *Hacemos la prueba con el usuario luis.torres del área de Operaciones intentando listar el contenido del home de ana.morales de Finanzas. El sistema responde de inmediato con 'Permission denied', comprobando el aislamiento total."*
-
----
-
-## Escena 4: Cambio Obligatorio de Contraseña (03:15 - 04:15)
-* **Visual:** Iniciar sesión con un usuario nuevo.
-* **Comandos a teclear:**
-  ```bash
   su - carlos.mendoza
-  # Ingresar contraseña temporal: TempPassTI2026!
-  # El sistema solicita la clave actual y pide una nueva
-  # Escribir nueva clave segura (ej: NuevaClaveSegura2026!)
-  exit
   ```
-* **Locución (Qué decir):**
-  > *"Ahora simulamos el primer inicio de sesión del usuario carlos.mendoza. Introducimos su contraseña provisional y vemos cómo el sistema intercepta el inicio y fuerza el cambio de contraseña de inmediato debido a la directiva chage -d 0. Hasta que el usuario no introduce una contraseña nueva, no se le permite utilizar la terminal."*
+  *(Ingresas la contraseña temporal `TempPassTI2026!`. El sistema te pedirá cambiarla de inmediato; pon una nueva clave, dale Enter y escribe `exit`).*
+* **Qué decir:**
+  > "Si listamos `/home` con `ls -ld /home/*`, vemos que todos los directorios tienen permisos `drwxr-x---`, es decir, modo 750. Esto significa que ningún usuario de un departamento puede entrar a husmear en los archivos de otro.  
+  > Y para probar la expiración de credenciales, iniciamos sesión como `carlos.mendoza`. Introducimos su contraseña temporal y el sistema de inmediato nos frena y nos exige cambiarla: 'You are required to change your password immediately'. Hasta que no definimos una contraseña nueva no nos deja trabajar. Salimos con `exit`."
 
 ---
 
-## Escena 5: Sudoers y Políticas de Horario (04:15 - 05:15)
-* **Visual:** Mostrar la regla de sudoers y las directivas horarias en `/etc/security/time.conf`.
-* **Comandos a teclear:**
+### 4. Directivas de Seguridad: Sudoers, PAM y Desbloqueo (02:30 - 03:30)
+* **Comandos en consola:**
   ```bash
-  cat /etc/sudoers.d/99-sistemas-security
-  sudo grep -v '^#' /etc/security/time.conf | grep -v '^$'
+  sudo ./scripts/apply_security.sh
+  sudo ./scripts/verify_system.sh check
   ```
-* **Locución (Qué decir):**
-  > *"Para la delegación de administración, no dimos acceso genérico. Creamos una regla en sudoers.d que restringe la administración exclusivamente al grupo 'sistemas', exigiendo autenticación propia y registrando cada comando en /var/log/sudo_sistemas.log.*  
-  > *Asimismo, a través del módulo pam_time configuramos franjas horarias estrictas: Finanzas y Operaciones solo pueden acceder en días laborales de 8:00 a 17:00 y 18:00 horas respectivamente, mientras que TI y Dirección mantienen disponibilidad continua."*
+* **Qué decir:**
+  > "Ahora aplicamos las directivas de seguridad con `sudo ./scripts/apply_security.sh`. Esto configura tres cosas clave:  
+  > Uno: control de sudoers delegado al grupo 'sistemas' con logs auditados en `/var/log/sudo_sistemas.log`.  
+  > Dos: control de horarios con `pam_time`, para que usuarios de Finanzas y Operaciones solo puedan acceder en horario laboral.  
+  > Tres: protección contra ataques de fuerza bruta con `pam_faillock`.  
+  > Para comprobar que todo quedó bien, corremos nuestra herramienta de auditoría: `sudo ./scripts/verify_system.sh check`.  
+  > Aquí vemos en un solo vistazo el aislamiento de directorios, las fechas de caducidad con `chage` y las políticas activas de PAM."
 
 ---
 
-## Escena 6: Prueba de Fuerza Bruta y Bloqueo con faillock (05:15 - 06:15)
-* **Visual:** Forzar 3 intentos fallidos de login y mostrar el bloqueo.
-* **Comandos a teclear:**
-  ```bash
-  # Intentos con clave errónea
-  su - luis.torres
-  # Escribir clave incorrecta 3 veces consecutivas
-  # Luego verificar el registro con faillock:
-  sudo faillock --user luis.torres
-  ```
-* **Locución (Qué decir):**
-  > *"Veamos la protección activa contra ataques de diccionario o fuerza bruta gestionada por pam_faillock. Intentamos ingresar 3 veces con contraseñas erróneas. Al consultar la herramienta faillock, observamos los 3 fallos registrados y la cuenta de luis.torres queda congelada por 300 segundos, impidiendo cualquier nuevo intento incluso si se teclea la clave correcta."*
-
----
-
-## Escena 7: Desaprovisionamiento y Conclusión (06:15 - 06:45)
-* **Visual:** Probar el script de bajas con respaldo y finalizar.
-* **Comandos a teclear:**
-  ```bash
-  sudo ./scripts/deprovision_users.sh -d mariana.solis
-  ls -lh /var/backups/deleted_users/
-  ```
-* **Locución (Qué decir):**
-  > *"Finalmente, cuando un usuario es dado de baja, ejecutamos deprovision_users.sh con el parámetro -d. El script mata sus procesos activos, genera un respaldo comprimido en tar.gz dentro de /var/backups/deleted_users y elimina la cuenta del sistema sin pérdida de información para auditoría.*  
-  > *Con esto concluye la validación de la Tarea 3.1, demostrando la administración completa del ciclo de vida y la seguridad del servidor. Muchas gracias por su atención."*
+### 5. Cierre Rápido (03:30 - 03:50)
+* **Qué decir:**
+  > "Como demostración final, si requerimos dar de baja o congelar a un usuario de forma segura, contamos con `deprovision_users.sh`, que permite suspender la cuenta o respaldar su directorio home antes de borrarlo.  
+  > Con esto cubrimos al 100% los requisitos de la Tarea 3.1. Todos los scripts y la documentación están en el repositorio de GitHub. ¡Muchas gracias por ver el video!"

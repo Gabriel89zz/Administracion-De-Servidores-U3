@@ -1,112 +1,77 @@
-# GUION TÉCNICO PARA GRABACIÓN DE VIDEO: TAREA 3.2
-**Plataforma de entrega:** YouTube (Enlace Público / Oculto)  
-**Requisito de Rúbrica:** Cámara web visible y activa en la **esquina inferior derecha** durante toda la grabación.  
-**Duración recomendada:** Entre 5 y 7 minutos.  
-**Resolución recomendada:** 1080p (1920x1080), tamaño de fuente de terminal de 16pt o superior.
+# GUION PARA VIDEO: TAREA 3.2
+**Materia:** Administración de Servidores  
+**Carrera:** Ingeniería en Informática  
+**Tema:** Permisos avanzados (SGID/Sticky/ACLs), Cuotas de disco y Respaldos automatizados  
+**Requisito indispensable:** Cámara web visible en la **esquina inferior derecha** todo el tiempo.  
+**Duración objetivo:** ~3 a 4 minutos (fluido, práctico y directo).
 
 ---
 
-## Checklist Previo a la Grabación
-
-1. [ ] Cámara web verificada en la **esquina inferior derecha** en OBS Studio o software de grabación.
-2. [ ] Sistema de archivos con cuotas activas (`sudo ./scripts/setup_quotas.sh setup`).
-3. [ ] Permisos y ACLs configurados (`sudo ./scripts/setup_acls.sh`).
-4. [ ] Script `restore.sh` y `backup.sh` listos con permisos de ejecución.
-
----
-
-## Estructura Cronológica del Video
-
-```
-00:00 - 00:45 | Introducción, presentación personal y objetivos de la Tarea 3.2
-00:45 - 02:00 | Demostración de Permisos Especiales: Sticky Bit, SGID y ACLs con getfacl
-02:00 - 03:15 | Demostración de Cuotas de Disco: repquota y prueba de límite con dd
-03:15 - 04:30 | Explicación de la Lógica del Script backup.sh y Programación en Cron
-04:30 - 05:30 | Ejecución Manual del Respaldo, Integridad y Hash SHA256
-05:30 - 06:30 | Prueba en Vivo de Recuperación de Archivos Borrados (RTO/RPO)
-06:30 - 07:00 | Conclusiones y Cierre
-```
+## Tips rápidos antes de grabar:
+1. Revisa tu cámara en la esquina inferior derecha.
+2. Abre la terminal en la carpeta de la Tarea 3.2:
+   ```bash
+   cd ~/Administracion-De-Servidores-U3/Unidad_3/Tarea_3.2/
+   ```
 
 ---
 
-## Escena 1: Introducción y Presentación (00:00 - 00:45)
-* **Visual:** Terminal despejada, cámara web en la esquina inferior derecha.
-* **Locución (Qué decir):**
-  > *"Hola a todos, soy [Tu Nombre], estudiante de Administración de Servidores. En esta entrega abordaremos la Tarea 3.2: Permisos avanzados, cuotas de disco y política de respaldos automatizados sobre Debian GNU/Linux.*  
-  > *Veremos en vivo cómo estructurar carpetas colaborativas seguras con Sticky Bit y SGID, cómo aplicar cuotas a nivel de kernel para evitar el agotamiento de espacio, la lógica técnica de nuestro script de respaldos multinivel con validación criptográfica y, finalmente, una prueba real de recuperación de un archivo crítico eliminado."*
+## 🎬 Minuto a Minuto del Video
+
+### 1. Introducción y Contexto (00:00 - 00:45)
+* **Qué hacer en pantalla:** Terminal limpia con tu webcam visible.
+* **Qué decir:**
+  > "Hola a todos, soy [Tu Nombre], estudiante de Ingeniería en Informática, y este video es para la materia de Administración de Servidores, correspondiente a la Tarea 3.2 de la Unidad 3.  
+  > Aquí vamos a trabajar con permisos avanzados en el sistema de archivos, cuotas de almacenamiento y una política formal de respaldos con recuperación de datos ante desastres.  
+  > Seguimos trabajando sobre nuestra máquina virtual Debian Server en VMware. Elegimos este entorno virtualizado porque nos permite manipular cuotas de disco a nivel de kernel en la partición ext4 y simular escenarios reales de pérdida y restauración de archivos sin comprometer la estabilidad del sistema anfitrión. Vamos directo a los comandos."
 
 ---
 
-## Escena 2: Permisos Especiales y ACLs (00:45 - 02:00)
-* **Visual:** Listado de `/srv/compartido` y lectura de ACLs con `getfacl`.
-* **Comandos a teclear:**
+### 2. Permisos Especiales: Sticky Bit, SGID y ACLs (00:45 - 01:30)
+* **Comandos en consola:**
   ```bash
-  ls -ld /srv/compartido/*
-  getfacl /srv/compartido/finanzas
+  sudo ./scripts/setup_acls.sh
   ```
-* **Locución (Qué decir):**
-  > *"Comenzamos inspeccionando la estructura en /srv/compartido. Noten en la carpeta 'publico' el permiso drwxrwxrwt: la 't' final indica el Sticky Bit activado. Cualquiera puede crear archivos aquí, pero solo el propietario legítimo puede borrarlos.*  
-  > *Por otro lado, en las áreas de finanzas, operaciones y sistemas vemos drwxrws---: la 's' corresponde al bit SGID. Esto garantiza que cualquier documento creado dentro pertenezca automáticamente al grupo del departamento.*  
-  > *Además, con getfacl observamos que la usuaria elena.ramirez de Dirección cuenta con una ACL de lectura y ejecución con herencia default, permitiéndole auditar sin perturbar los grupos primarios."*
+* **Qué decir:**
+  > "Primero corremos `sudo ./scripts/setup_acls.sh`.  
+  > Este script configura tres conceptos fundamentales de Linux:  
+  > Primero, el **Sticky Bit** en la carpeta `/srv/compartido/publico` con permisos 1777 (`drwxrwxrwt`). Esto hace que cualquiera pueda crear archivos, pero nadie pueda borrar los archivos de otros.  
+  > Segundo, el bit **SGID** en las carpetas departamentales (`drwxrws---`), para que cualquier archivo creado dentro herede automáticamente el grupo del departamento.  
+  > Y tercero, aplicamos **ACLs con herencia por defecto** con `setfacl`, para que la usuaria Elena Ramírez de Dirección pueda auditar Finanzas sin cambiar los grupos del sistema."
 
 ---
 
-## Escena 3: Cuotas de Disco y Prueba de Límite Duro (02:00 - 03:15)
-* **Visual:** Ejecutar `repquota` y probar el desbordamiento con `dd`.
-* **Comandos a teclear:**
+### 3. Cuotas de Disco y Prueba de Límite Duro (01:30 - 02:20)
+* **Comandos en consola:**
   ```bash
-  sudo repquota -as
+  sudo ./scripts/setup_quotas.sh setup
   sudo ./scripts/setup_quotas.sh test ana.morales
   ```
-* **Locución (Qué decir):**
-  > *"Pasamos al control de recursos. Con repquota -as consultamos el estado de cuotas del kernel. La usuaria ana.morales tiene un límite blando de 100 MB y un límite duro de 120 MB.*  
-  > *Para demostrar que el kernel hace cumplir la directiva, ejecutamos la prueba con dd intentando escribir un archivo de 130 MB. Observen en la terminal: el sistema interrumpe la operación de golpe con el mensaje 'Disk quota exceeded'. Con esto evitamos que un usuario llene la partición del servidor."*
+* **Qué decir:**
+  > "Ahora gestionamos el almacenamiento con cuotas de disco mediante `sudo ./scripts/setup_quotas.sh setup`.  
+  > Aquí configuramos cuotas a nivel de kernel en ext4. Vemos con `repquota` que la usuaria `ana.morales` tiene un límite blando de 100 Megas y un límite duro de 120 Megas.  
+  > Para demostrar que el servidor hace cumplir el límite, corremos la prueba `test`: intentamos escribir un archivo de 130 Megas con el comando `dd` y fíjense cómo el kernel bloquea la escritura de golpe arrojando: 'Se ha excedido la cuota de disco'. Con esto evitamos que un usuario sature el disco del servidor."
 
 ---
 
-## Escena 4: Lógica de Respaldo y Calendarización en Cron (03:15 - 04:30)
-* **Visual:** Mostrar el código de `backup.sh` y el archivo de cron.
-* **Comandos a teclear:**
+### 4. Respaldos Automatizados y Prueba de Restauración (RTO/RPO) (02:20 - 03:30)
+* **Comandos en consola:**
   ```bash
   cat crontab/backup.cron
-  head -n 35 scripts/backup.sh
-  ```
-* **Locución (Qué decir):**
-  > *"Diseñamos una política formal con un RPO de 24 horas y un RTO de menos de 1 hora. En el archivo crontab programamos una tarea desatendida: los domingos a las 2 AM se ejecuta un respaldo COMPLETO nivel 0, y de lunes a sábado a la misma hora se ejecutan respaldos INCREMENTALES nivel 1.*  
-  > *El script backup.sh utiliza el motor de snapshot snar de GNU tar para detectar únicamente los bloques modificados, aplica compresión gzip, calcula la firma criptográfica SHA256 y sincroniza una copia en un medio secundario."*
-
----
-
-## Escena 5: Ejecución Manual y Hashes (04:30 - 05:30)
-* **Visual:** Ejecutar el respaldo completo en la consola y ver el log.
-* **Comandos a teclear:**
-  ```bash
-  sudo ./scripts/backup.sh full
-  ls -lh /var/backups/sistema/
-  cat /var/log/backup_system.log | tail -n 12
-  ```
-* **Locución (Qué decir):**
-  > *"Ejecutamos manualmente el respaldo completo. En cuestión de segundos, el script empaqueta las áreas de /srv/compartido, /home y las configuraciones de seguridad. Valida la integridad del archivo tar, calcula su hash SHA256, reporta el tamaño final y confirma la copia al directorio secundario. Todo queda asentado en /var/log/backup_system.log para fines de auditoría."*
-
----
-
-## Escena 6: Prueba en Vivo de Recuperación de Archivos Borrados (05:30 - 06:30)
-* **Visual:** Correr el modo de prueba automatizado de `restore.sh test`.
-* **Comandos a teclear:**
-  ```bash
   sudo ./scripts/restore.sh test
   ```
-* **Locución (Qué decir):**
-  > *"Ahora realizaremos la prueba de fuego de nuestro plan de recuperación ante desastres con el comando restore.sh test.*  
-  > *Paso 1: Se crea un archivo confidencial con información financiera.*  
-  > *Paso 2: Generamos el respaldo.*  
-  > *Paso 3: Simulamos la catástrofe: eliminamos el archivo por completo con rm -f.*  
-  > *Paso 4: El script de restauración valida la firma SHA256 del paquete para descartar manipulación y extrae el respaldo.*  
-  > *Paso 5: Comprobamos el resultado. Como vemos en pantalla, el documento reaparece intacto, con sus permisos originales y contenido verificado. El RTO fue de escasos segundos."*
+* **Qué decir:**
+  > "Para la política de respaldos, definimos un RPO de 24 horas y un RTO menor a una hora. En `backup.cron` dejamos programada la tarea con cron: respaldos completos los domingos e incrementales entre semana.  
+  > Y para cerrar, corremos la prueba más importante: `sudo ./scripts/restore.sh test`.  
+  > Miren lo que hace el script en tiempo real:  
+  > 1. Crea un documento confidencial en Finanzas.  
+  > 2. Genera un respaldo completo comprimido con tar y calcula su hash SHA256.  
+  > 3. Simula una catástrofe: borra el archivo con `rm -f`.  
+  > 4. Ejecuta la restauración, comprueba que la firma SHA256 coincide para evitar archivos corruptos, y extrae la copia.  
+  > 5. Al final confirma que el archivo fue recuperado al 100% con su contenido y permisos originales, arrojando 'PRUEBA SUPERADA'. El RTO fue de apenas un segundo."
 
 ---
 
-## Escena 7: Conclusión (06:30 - 07:00)
-* **Visual:** Regreso a la terminal principal con los scripts.
-* **Locución (Qué decir):**
-  > *"Con estas pruebas hemos demostrado el cumplimiento cabal de la Tarea 3.2: permisos POSIX avanzados para colaboración segura, control de almacenamiento mediante cuotas y un esquema robusto y probado de respaldos y recuperación. Muchas gracias y nos vemos en la Tarea 3.3."*
+### 5. Cierre Rápido (03:30 - 03:45)
+* **Qué decir:**
+  > "Con esto comprobamos el funcionamiento completo de los permisos avanzados, las cuotas de disco y el plan de respaldo y recuperación. Los scripts están disponibles en el repo. ¡Muchas gracias!"
