@@ -35,7 +35,7 @@ graph TD
     Srv --> Operaciones
     Srv --> Sistemas
 
-    Finanzas -.->|ACL Herencia r-x| Elena[elena.ramirez (Dirección)]
+    Finanzas -.->|"ACL Herencia (r-x)"| Elena["elena.ramirez (Direccion)"]
 ```
 
 1. **Sticky Bit en Directorio Público (`chmod 1777 /srv/compartido/publico`):**
