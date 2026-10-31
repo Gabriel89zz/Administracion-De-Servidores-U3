@@ -13,11 +13,11 @@
 
 ## Tabla de Contenidos y Entregables
 
-| Tarea | Descripción | Código & Scripts | Documento Técnico | Video en YouTube |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tarea 3.1** | Automatización de usuarios, grupos y directivas de seguridad | [Scripts 3.1](./Unidad_3/Tarea_3.1/scripts/) | [Manual Técnico 3.1 (Markdown)](./Unidad_3/Tarea_3.1/docs/Manual_Tecnico_3.1.md) | [Ver en YouTube (Pendiente Enlace)](#) |
-| **Tarea 3.2** | Permisos avanzados (SGID/Sticky/ACLs), Cuotas y Respaldos | [Scripts 3.2](./Unidad_3/Tarea_3.2/scripts/) | [Reporte Técnico 3.2 (Markdown)](./Unidad_3/Tarea_3.2/docs/Reporte_Tecnico_3.2.md) | [Ver en YouTube (Pendiente Enlace)](#) |
-| **Tarea 3.3** | Almacenamiento redundante (RAID/NAS) y Colas de Impresión (CUPS) | [Scripts 3.3](./Unidad_3/Tarea_3.3/scripts/) | [Reporte Técnico 3.3 (Markdown)](./Unidad_3/Tarea_3.3/docs/Reporte_Tecnico_3.3.md) | [Ver en YouTube (Pendiente Enlace)](#) |
+| Tarea | Descripción | Código & Scripts | Documento Técnico |
+| :--- | :--- | :--- | :--- |
+| **Tarea 3.1** | Automatización de usuarios, grupos y directivas de seguridad | [Scripts 3.1](./Unidad_3/Tarea_3.1/scripts/) | [Manual Técnico 3.1 (Markdown)](./Unidad_3/Tarea_3.1/docs/Manual_Tecnico_3.1.md) |
+| **Tarea 3.2** | Permisos avanzados (SGID/Sticky/ACLs), Cuotas y Respaldos | [Scripts 3.2](./Unidad_3/Tarea_3.2/scripts/) | [Reporte Técnico 3.2 (Markdown)](./Unidad_3/Tarea_3.2/docs/Reporte_Tecnico_3.2.md) |
+| **Tarea 3.3** | Almacenamiento redundante (RAID/NAS) y Colas de Impresión (CUPS) | [Scripts 3.3](./Unidad_3/Tarea_3.3/scripts/) | [Reporte Técnico 3.3 (Markdown)](./Unidad_3/Tarea_3.3/docs/Reporte_Tecnico_3.3.md) |
 
 ---
 
